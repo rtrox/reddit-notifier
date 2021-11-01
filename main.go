@@ -79,13 +79,30 @@ func main() {
 		log.Fatalf("REDDIT_MATCHER environmental variable not set.")
 	}
 	matcher, err := regexp.Compile(expr)
+	if err != nil {
+		log.Fatalf("could not compile regex for matcher: %v", err)
+	}
 
 	discordUrl := os.Getenv("REDDIT_DISCORD_URL")
 	if discordUrl == "" {
 		log.Fatalf("REDDIT_DISCORD_URL environmental variable not set.")
 	}
-	if err != nil {
-		log.Fatalf("could not compile regex for matcher: %v", err)
+
+	login := false
+	if os.Getenv("REDDIT_LOG_IN") != "" {
+		login = true
+	}
+
+	username := os.Getenv("REDDIT_USERNAME")
+	password := os.Getenv("REDDIT_PASSWORD")
+	app_id := os.Getenv("REDDIT_APP_ID")
+	app_secret := os.Getenv("REDDIT_APP_SECRET")
+
+	if login {
+		if username == "" || password == "" || app_id == "" || app_secret == "" {
+			log.Fatalf("REDDIT_USERNAME, REDDIT_PASSWORD, REDDIT_APP_ID and REDDIT_SECRET must all be set to use logged in mode.")
+		}
+		log.Info("Using Logged In Mode.")
 	}
 
 	log.Info("reddit-notifier initialized.")
@@ -94,7 +111,22 @@ func main() {
 	defer close(sig)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 
-	posts, errs, stop := reddit.DefaultClient().Stream.Posts(subreddit, reddit.StreamInterval(time.Second*3))
+	var client *reddit.Client
+	if login {
+		credentials := reddit.Credentials{
+			ID: app_id,
+			Secret: app_secret,
+			Username: username,
+			Password: password,
+		}
+		client, err = reddit.NewClient(credentials, reddit.WithUserAgent(fmt.Sprintf("linux:reddit-notifier:latest (by /u/%s)", username)))
+	} else {
+		client, err = reddit.NewReadonlyClient(reddit.WithUserAgent("linux:reddit-notifier:latest"))
+	}
+	if err != nil {
+		log.Fatalf("Could not create reddit client: %v", err)
+	}
+	posts, errs, stop := client.Stream.Posts(subreddit, reddit.StreamInterval(time.Second*2))
 	defer stop()
 
 	for {
