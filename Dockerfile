@@ -3,7 +3,7 @@
 ##
 ## Build
 ##
-FROM golang:1.16-buster AS build
+FROM golang:1.17-alpine AS build
 
 WORKDIR /app
 
@@ -18,14 +18,8 @@ RUN go build -o /reddit-notifier
 ##
 ## Deploy
 ##
-FROM alpine:3.13
-
-WORKDIR /
+FROM alpine:3.14
 
 COPY --from=build /reddit-notifier /reddit-notifier
 
-EXPOSE 8080
-
-USER nonroot:nonroot
-
-ENTRYPOINT ["/reddit-notifier"]
+CMD ["/reddit-notifier"]

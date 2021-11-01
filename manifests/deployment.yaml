@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: reddit-notifier
+  name: reddit-notifier
+  namespace: reddit-notifier
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reddit-notifier
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: reddit-notifier
+    spec:
+      containers:
+      - image: swyytch/reddit-notifier:latest
+        imagePullPolicy: Always
+        name: reddit-notifier
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 64Ki
+        env:
+          - name: REDDIT_SUBREDDIT
+            valueFrom:
+              secretKeyRef:
+                name: reddit-notifier
+                key: REDDIT_SUBREDDIT
+          - name: REDDIT_MATCHER
+            valueFrom:
+              secretKeyRef:
+                name: reddit-notifier
+                key: REDDIT_MATCHER
+          - name: REDDIT_DISCORD_URL
+            valueFrom:
+                secretKeyRef:
+                  name: reddit-notifier
+                  key: REDDIT_DISCORD_URL
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
