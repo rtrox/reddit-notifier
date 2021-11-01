@@ -29,20 +29,20 @@ spec:
             cpu: 100m
             memory: 64Ki
         env:
-          - name: REDDIT_SUBREDDIT
-            valueFrom:
-              secretKeyRef:
-                name: reddit-notifier
-                key: REDDIT_SUBREDDIT
-          - name: REDDIT_MATCHER
-            valueFrom:
-              secretKeyRef:
-                name: reddit-notifier
-                key: REDDIT_MATCHER
-          - name: REDDIT_DISCORD_URL
-            valueFrom:
-                secretKeyRef:
-                  name: reddit-notifier
-                  key: REDDIT_DISCORD_URL
+        - name: REDDIT_SUBREDDIT
+          valueFrom:
+            secretKeyRef:
+              name: reddit-notifier
+              key: REDDIT_SUBREDDIT
+        - name: REDDIT_MATCHER
+          valueFrom:
+            secretKeyRef:
+              name: reddit-notifier
+              key: REDDIT_MATCHER
+        - name: REDDIT_DISCORD_URL
+          valueFrom:
+            secretKeyRef:
+              name: reddit-notifier
+              key: REDDIT_DISCORD_URL
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
