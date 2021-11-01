@@ -1,0 +1,16 @@
+---
+name: "Pull Request Handler"
+on: pull_request
+
+jobs:
+  add-reviews:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: kentaro-m/auto-assign-action@v1.2.0
+        with:
+          configuration-path: ".github/auto-assign.yml"
+      - uses: unsplash/comment-on-pr@v1.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "Reviewer: Ensure current integration tests are still safe, and then label this PR with `run-integration-tests`"

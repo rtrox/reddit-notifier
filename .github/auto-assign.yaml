@@ -1,0 +1,15 @@
+addReviewers: true
+addAssignees: true
+
+reviewers:
+  - rtrox
+
+numberOfReviewers: 0 # all
+
+assignees:
+  - rtrox
+
+numberOfAssignees: 0
+
+skipKeywords:
+  - wip

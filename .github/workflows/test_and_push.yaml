@@ -1,0 +1,93 @@
+---
+name: Test and Push
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - name: Set Version in Binary
+        run: ./.github/scripts/version.sh
+      - uses: pre-commit/action@v2.0.3
+
+  go-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Set Version in Binary
+        run: ./.github/scripts/version.sh
+
+      - name: Vendor
+        run: go mod vendor
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Vet
+        run: go vet -v ./...
+
+      - name: Test
+        run: go test -v ./...
+
+  docker-images:
+    needs:
+      - pre-commit
+      - go-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: Set Version in Binary
+        run: ./.github/scripts/version.sh
+
+      - name: Prepare
+        id: prepare
+        run: |
+          DOCKER_IMAGE=swyytch/reddit-notifier
+          DOCKER_PLATFORMS=linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          TAGS="--tag ${DOCKER_IMAGE}:latest"
+          TAGS="$TAGS --tag ${DOCKER_IMAGE}:$(git rev-parse --short HEAD)"
+          GIT_TAG=$(git tag --points-at HEAD | tr -d '\n')
+          if [ ! -z "$GIT_TAG" ]; then TAGS="$TAGS --tag ${DOCKER_IMAGE}:${GIT_TAG}"; fi
+          echo ::set-output name=docker_image::${DOCKER_IMAGE}
+          echo ::set-output name=buildx_args::--platform ${DOCKER_PLATFORMS} \
+            $TAGS --file ./Dockerfile ./
+      # https://github.com/docker/setup-qemu-action
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Docker Buildx (build)
+        run: |
+          docker buildx build --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
+      - name: Docker Login
+        if: success() && github.event_name != 'pull_request'
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+      - name: Docker Buildx (push)
+        if: success() && github.event_name != 'pull_request'
+        run: |
+          docker buildx build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }}
+      - name: Clear
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          rm -f ${HOME}/.docker/config.json
