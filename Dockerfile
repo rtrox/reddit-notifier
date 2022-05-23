@@ -18,7 +18,7 @@ RUN go build -o /reddit-notifier
 ##
 ## Deploy
 ##
-FROM alpine:3.15
+FROM alpine:3.16
 
 COPY --from=build /reddit-notifier /reddit-notifier
 
