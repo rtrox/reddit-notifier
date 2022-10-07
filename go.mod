@@ -1,6 +1,6 @@
 module github.com/rtrox/reddit-notifier
 
-go 1.16
+go 1.19
 
 require (
 	github.com/sirupsen/logrus v1.8.1 // indirect
