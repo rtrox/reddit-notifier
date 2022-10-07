@@ -13,6 +13,7 @@ RUN go mod download
 
 COPY *.go ./
 
+RUN apk add build-base
 RUN go build -o /reddit-notifier
 
 ##
