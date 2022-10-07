@@ -6,7 +6,7 @@ replace github.com/vartanbeno/go-reddit/v2 => github.com/rtrox/go-reddit/v2 v2.0
 
 require (
 	github.com/sirupsen/logrus v1.9.0
-	github.com/vartanbeno/go-reddit/v2 v2.0.0-00010101000000-000000000000
+	github.com/vartanbeno/go-reddit/v2 v2.0.1
 )
 
 require (
