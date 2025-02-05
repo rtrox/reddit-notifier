@@ -1,27 +1,6 @@
 {
-    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": ["config:base", "docker:enableMajor"],
-    "enabledManagers": ["dockerfile", "gomod", "git-submodules", "pre-commit", "github-actions"],
-    "packageRules": [{ "updateTypes": ["minor", "patch", "pin", "digest"], "automerge": true }],
-    "assignees": ["rtrox"],
-    "assignAutomerge": true,
-    "labels": ["renovate"],
-    "packageRules": [
-      {
-        "matchDepTypes": ["optionalDependencies"],
-        "addLabels": ["optional"]
-      },
-      {
-        "updateTypes": ["major"],
-        "addLabels": ["renovate::major"]
-      },
-      {
-        "updateTypes": ["minor"],
-        "addLabels": ["renovate::minor"]
-      },
-      {
-        "updateTypes": ["pin"],
-        "addLabels": ["renovate::pin"]
-      },
-    ]
-  }
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+      "local>rtrox/renovate-config"
+   ],
+}
