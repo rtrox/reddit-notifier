@@ -1,11 +1,11 @@
 module github.com/rtrox/reddit-notifier
 
-go 1.19
+go 1.23
 
 replace github.com/vartanbeno/go-reddit/v2 => github.com/rtrox/go-reddit/v2 v2.0.1-0.20211031224903-bfb8c6b683b5
 
 require (
-	github.com/sirupsen/logrus v1.9.4
+	github.com/sirupsen/logrus v1.10.0
 	github.com/vartanbeno/go-reddit/v2 v2.0.1
 )
 
